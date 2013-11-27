@@ -11,49 +11,76 @@
  *
  * @author paulo
  */
-class EuropassElement {
-    protected $elements, $attributes;
+abstract class EuropassElement {
+    protected $elements;
     
-    protected function getElement($key){
-        return isset($elements) && isset($elements[$key]) ? $elements[$key]:null;
+    public function getElement($elementName){
+        return isset($this->elements) && isset($this->elements[$elementName]) ? $this->elements[$elementName]:null;
     }
     
-    protected function setElementValue($key,$value){
-        $success = false;
-        if( isset($elements) && isset($elements[$key]) ){
-            $elements[$key]['$value']=$value;
-            $success = true;
+    public function setElementValue($elementName,$value){
+        if( !isset($this->elements) || !isset($this->elements[$this->elements]) ){
+            throw new EuropassElementNotFoundException('EuropassElement '.$elementName.' not found!');
         }
-        return $success;
+        
+        $this->elements[$elementName]['value']=$value;
     }
     
-    protected function getAttributes($key){
-        return isset($attributes) && isset($attributes[$key]) ? $attributes[$key]:null;
-    }
-    
-    protected function setAttributesValue($key,$value){
-        $success = false;
-        if( isset($attributes) && isset($attributes[$key]) ){
-            $attributes[$key]['$value']=$value;
-            $success = true;
+    public function showElement($elementName){
+        if( !isset($this->elements) || !isset($this->elements[$elementName]) ){
+            throw new EuropassElementNotFoundException('EuropassElement '.$elementName.' not found!');
         }
-        return $success;
+        $this->elements[$elementName]['show']=true;
     }
+    
+    public function hideElement($elementName){
+        if( !isset($this->elements) || !isset($this->elements[$elementName]) ){
+            throw new EuropassElementNotFoundException('EuropassElement '.$elementName.' not found!');
+        }
+        $this->elements[$elementName]['show']=false;
+    }
+    
+    public function isElementVisible($elementName){
+        if( !isset($this->elements) || !isset($this->elements[$elementName]) ){
+            throw new EuropassElementNotFoundException('EuropassElement '.$elementName.' not found!');
+        }
+        return $this->elements[$elementName]['show'];
+    }
+    
+//    protected function getAttributes($key){
+//        return isset($attributes) && isset($attributes[$key]) ? $attributes[$key]:null;
+//    }
+//    
+//    protected function setAttributesValue($key,$value){
+//        $success = false;
+//        if( isset($attributes) && isset($attributes[$key]) ){
+//            $attributes[$key]['$value']=$value;
+//            $success = true;
+//        }
+//        return $success;
+//    }
     
     public function renderXML(){
-
+        $xml = '';
+        $topXML = '<'.get_class().'>';
+        $bottomXML = '</'.get_class().'>';
+        
+        if(!isset($this->elements)) return '';
+        
         foreach($this->elements as $key=>$attrs){
            if( !isset($attrs['show']) || !$attrs['show']){
                continue;
            } 
-           echo '<'.$key.'>';
+           $xml.= '<'.$key.'>';
            if(!isset($attrs['multiple'])){
-               echo $attrs['value'];
+               $xml.= $attrs['value'];
            }else{
                // do stuff
            }
-           echo '</'.$key.'>';
+           $xml.= '</'.$key.'>';
         }
+        
+        return $topXML.$xml.$bottomXML;
     }
     
 }
